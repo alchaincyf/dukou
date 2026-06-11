@@ -16,15 +16,22 @@ window.WX2X = {
     return findBodyEditorHeuristic();
   },
 
-  // 封面：找接受图片的 input[type=file]，直接塞文件
+  // 封面（2026-06实测DOM）：cover input是 [data-testid="fileInput"]，页面加载完才挂出来；
+  // 塞文件后X弹「Edit media」裁剪框，自动点 [data-testid="applyButton"] 确认
   async fillCover(article) {
-    const inputs = [...document.querySelectorAll('input[type="file"]')]
-      .filter((i) => !i.accept || /image/.test(i.accept));
-    if (inputs.length === 0) throw new Error('no file input');
+    const input = await waitFor(() =>
+      document.querySelector('input[data-testid="fileInput"]') ||
+      [...document.querySelectorAll('input[type="file"]')].find((i) => !i.accept || /image/.test(i.accept)),
+    6000);
+    if (!input) throw new Error('没找到封面上传入口');
     const file = dataUrlToFile(article.coverDataUrl, 'cover');
     const dt = new DataTransfer();
     dt.items.add(file);
-    inputs[0].files = dt.files;
-    inputs[0].dispatchEvent(new Event('change', { bubbles: true }));
+    input.files = dt.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const apply = await waitFor(() => document.querySelector('[role="dialog"] [data-testid="applyButton"]'), 8000);
+    if (!apply) throw new Error('裁剪弹窗没出现，可能图片格式不被接受');
+    apply.click();
   },
 };

@@ -307,8 +307,11 @@ async function fillArticle(article) {
         const coverDataUrl = await fitImageToLimit(article.coverDataUrl, '头图');
         await ADAPTER.fillCover({ ...article, coverDataUrl });
         await sleep(1500);
-        coverNote = '；头图已上传，弹出裁剪框请点 Apply 确认';
-      } catch (e) { console.warn('[wx2x] 头图填入失败（不影响正文）', e); }
+        coverNote = '；头图已就位';
+      } catch (e) {
+        console.warn('[wx2x] 头图填入失败（不影响正文）', e);
+        coverNote = `；⚠️ 头图未成功（${e.message}），请手动添加`;
+      }
     }
 
     progress(`已渡达：${htmlBlocks.length}个段落 + ${images.length}张图，请对照原文检查${coverNote}`, 1);
