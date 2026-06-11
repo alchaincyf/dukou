@@ -23,18 +23,25 @@ async function init() {
 }
 
 // 渡口桥的autofill任务：background入库后放了wx_autofill标记并打开本页
+// 标记等到编辑器真出现、即将动手填时才消费——X要用户先点Write，可能要等一会儿
 async function maybeAutoFill() {
   if (!ADAPTER.key) return;
   const { wx_autofill } = await chrome.storage.local.get('wx_autofill');
   if (!wx_autofill || wx_autofill.dest !== ADAPTER.key) return;
-  await chrome.storage.local.remove('wx_autofill'); // 先消费，防止多tab/刷新重复填
-  if (Date.now() - wx_autofill.at > 3 * 60 * 1000) return; // 过期标记不执行
+  if (Date.now() - wx_autofill.at > 10 * 60 * 1000) {
+    chrome.storage.local.remove('wx_autofill'); // 过期标记清掉不执行
+    return;
+  }
   const data = await chrome.storage.local.get('art_' + wx_autofill.id);
   const article = data['art_' + wx_autofill.id];
-  if (!article) return;
+  if (!article) { chrome.storage.local.remove('wx_autofill'); return; }
   progress(`渡口桥：《${article.title}》待自动填入，等编辑器出现…${ADAPTER.key === 'x' ? '（请点 Write 新建草稿）' : ''}`);
-  const ed = await waitFor(() => ADAPTER.findBodyEditor(), 180000);
-  if (!ed) { progress('3分钟内没等到编辑器，请手动点「填入这篇」'); return; }
+  const ed = await waitFor(() => ADAPTER.findBodyEditor(), 10 * 60 * 1000);
+  if (!ed) { progress('没等到编辑器，请手动点「填入这篇」'); return; }
+  // 动手前再确认标记还在（可能已被别的tab执行掉），确认后消费
+  const { wx_autofill: still } = await chrome.storage.local.get('wx_autofill');
+  if (!still || still.at !== wx_autofill.at) return;
+  await chrome.storage.local.remove('wx_autofill');
   fillArticle(article);
 }
 
