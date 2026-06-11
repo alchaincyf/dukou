@@ -1,0 +1,76 @@
+{
+  "manifest_version": 3,
+  "name": "渡口 · 稿件分发",
+  "version": "3.1.0",
+  "description": "稿件在此落库，渡往各处——抓取微信文章/飞书文档入文库，一键填入X Articles、B站专栏、飞书文档，可下载为md+图片zip，可通过本地渡口桥与终端agent互通",
+  "permissions": [
+    "storage",
+    "tabs",
+    "unlimitedStorage",
+    "downloads",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "https://mp.weixin.qq.com/*",
+    "http://mp.weixin.qq.com/*",
+    "https://x.com/*",
+    "https://twitter.com/*",
+    "https://member.bilibili.com/*",
+    "https://open.feishu.cn/*",
+    "https://*.feishu.cn/*",
+    "https://*.feishucdn.com/*",
+    "https://*.larksuitecdn.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "渡口",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mp.weixin.qq.com/s*",
+        "http://mp.weixin.qq.com/s*"
+      ],
+      "js": [
+        "wechat-extract.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+      ],
+      "js": [
+        "x-adapter.js",
+        "fill-common.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://member.bilibili.com/*"
+      ],
+      "js": [
+        "bili-adapter.js",
+        "fill-common.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

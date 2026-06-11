@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  :root{
+    --paper:#FAF9F6;
+    --card:#FFFFFF;
+    --ink:#1F1D1A;
+    --ink2:#6E695F;
+    --ink3:#A39E93;
+    --hair:#E6E2D8;
+    --hair2:#EFECE4;
+    --seal:#BF3B1F;
+    --seal-dk:#A5300F;
+    --serif:'Songti SC','STSong','Noto Serif SC',serif;
+    --sys:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{width:380px;background:var(--card);font-family:var(--sys);color:var(--ink);-webkit-font-smoothing:antialiased;}
+
+  /* 品牌区 */
+  .brand{display:flex;align-items:center;gap:12px;padding:16px 20px 14px;border-bottom:1px solid var(--hair2);}
+  .brand .mark{width:34px;height:34px;border-radius:7px;background:var(--seal);line-height:0;flex:none;}
+  .brand .name{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:5px;}
+  .brand .slogan{font-size:11.5px;color:var(--ink3);letter-spacing:.5px;margin-top:2px;}
+
+  .body{padding:16px 20px 0;}
+
+  /* 链接输入 */
+  .input-wrap{display:flex;align-items:flex-start;gap:10px;border:1px solid var(--hair);border-radius:4px;padding:10px 12px;background:var(--paper);}
+  .input-wrap:focus-within{border-color:var(--ink3);}
+  .input-wrap svg{flex:none;margin-top:2px;color:var(--ink3);}
+  .input-wrap textarea{flex:1;border:none;outline:none;background:transparent;resize:none;font-size:13px;font-family:var(--sys);color:var(--ink);height:38px;line-height:1.5;}
+  .input-wrap textarea::placeholder{color:var(--ink3);}
+
+  /* 去向：单行动作按钮，hover朱砂实底 */
+  .dest-label{font-size:11px;letter-spacing:3px;color:var(--ink3);margin:16px 0 9px;}
+  .dest{display:flex;gap:8px;}
+  .dest button{flex:1;display:flex;align-items:center;justify-content:center;gap:2px;
+    border:1px solid var(--ink2);border-radius:4px;background:var(--card);
+    padding:9px 0;font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;font-family:var(--sys);
+    transition:background .12s,color .12s,border-color .12s;}
+  .dest button svg{color:var(--ink3);transition:color .12s,transform .12s;}
+  .dest button:hover{background:var(--seal);border-color:var(--seal);color:#fff;}
+  .dest button:hover svg{color:#fff;transform:translateX(2px);}
+  .dest button:active{background:var(--seal-dk);border-color:var(--seal-dk);}
+  .dest button:disabled{opacity:.45;cursor:default;}
+
+  /* 状态行 */
+  .status{display:flex;align-items:flex-start;gap:8px;margin-top:14px;padding:0 2px 13px;font-size:12px;line-height:1.6;color:var(--ink2);border-bottom:1px solid var(--hair2);white-space:pre-wrap;word-break:break-all;}
+  .status::before{content:'';flex:none;width:6px;height:6px;border-radius:50%;background:var(--seal);margin-top:5px;}
+  .status:empty{display:none;}
+  .status.error{color:var(--seal-dk);}
+
+  /* 文库 */
+  .lib-head{display:flex;align-items:baseline;justify-content:space-between;margin:14px 0 2px;}
+  .lib-head .t{font-size:11px;letter-spacing:3px;color:var(--ink3);}
+  .lib-head .n{font-size:11px;color:var(--ink3);}
+  #library{max-height:300px;overflow-y:auto;}
+  .lib-item{padding:12px 0 11px;border-bottom:1px solid var(--hair2);}
+  .lib-item:last-child{border-bottom:none;}
+  .lib-item .title{font-size:13px;line-height:1.55;font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .lib-item .title .latest{font-size:10px;color:var(--seal);border:1px solid var(--seal);border-radius:2px;padding:0 4px;margin-left:6px;font-weight:400;}
+  .lib-item .meta-row{display:flex;align-items:center;justify-content:space-between;margin-top:7px;}
+  .lib-item .meta{font-size:11px;color:var(--ink3);letter-spacing:.5px;}
+  .lib-ops{display:flex;gap:4px;}
+  .lib-ops button{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:none;border-radius:4px;background:transparent;cursor:pointer;color:var(--ink2);}
+  .lib-ops button:hover{background:var(--hair2);color:var(--ink);}
+  .lib-ops button:disabled{opacity:.4;cursor:default;}
+  .empty{font-size:12px;color:var(--ink3);padding:14px 0 16px;}
+
+  /* AI终端提示 */
+  .agent-tip{padding:10px 20px 14px;font-size:11px;line-height:1.7;color:var(--ink3);border-top:1px solid var(--hair2);}
+  .agent-tip a{color:var(--seal);text-decoration:none;}
+  .agent-tip a:hover{text-decoration:underline;}
+
+  /* 飞书配置 */
+  .foot{background:var(--paper);border-top:1px solid var(--hair2);margin-top:6px;}
+  .foot summary{display:flex;align-items:center;gap:8px;padding:12px 20px;font-size:12px;color:var(--ink2);cursor:pointer;list-style:none;}
+  .foot summary::-webkit-details-marker{display:none;}
+  .foot summary svg{color:var(--ink2);}
+  .foot summary .chev{margin-left:auto;color:var(--ink3);transition:transform .15s;}
+  .foot[open] summary .chev{transform:rotate(90deg);}
+  .foot .cfg{display:flex;flex-direction:column;gap:6px;padding:0 20px 14px;}
+  .foot input{padding:8px 10px;border:1px solid var(--hair);border-radius:4px;font-size:12px;background:var(--card);color:var(--ink);outline:none;font-family:var(--sys);}
+  .foot input:focus{border-color:var(--ink3);}
+  .foot .save{margin-top:2px;padding:8px 0;border:1px solid var(--seal);border-radius:4px;background:transparent;color:var(--seal);font-size:12px;letter-spacing:2px;cursor:pointer;}
+  .foot .save:hover{background:var(--seal);color:#fff;}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="mark" viewBox="0 0 64 64">
+      <rect x="25.5" y="10" width="13" height="18" rx="1" fill="#fff"/>
+  <path d="M13 36 H51 L42.5 48.5 H21.5 Z" fill="#fff"/>
+  <rect x="24" y="55" width="16" height="2.6" rx="1.3" fill="#fff" opacity=".75"/>
+    </symbol>
+    <symbol id="i-link" viewBox="0 0 16 16">
+      <path d="M6.5 9.5 L9.5 6.5 M5 11 L3.8 12.2 a2.4 2.4 0 0 1 -3.4 -3.4 L3.6 5.6 a2.4 2.4 0 0 1 3.4 0 M11 5 L12.2 3.8 a2.4 2.4 0 0 1 3.4 3.4 L12.4 10.4 a2.4 2.4 0 0 1 -3.4 0" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" transform="translate(0,-0.4) scale(0.92) translate(0.7,0.7)"/>
+    </symbol>
+    <symbol id="i-zip" viewBox="0 0 16 16">
+      <path d="M8 2 V9.5 M5.2 7 L8 9.8 L10.8 7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M2.5 12 H13.5 L12 14.5 H4 Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-feishu" viewBox="0 0 16 16">
+      <path d="M14 2.5 L2 7 L6.5 9 L8.5 13.5 L14 2.5 Z M6.5 9 L14 2.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-del" viewBox="0 0 16 16">
+      <path d="M3 4.5 H13 M6.2 4.5 V3 H9.8 V4.5 M4.4 4.5 L5.1 13.2 H10.9 L11.6 4.5 M6.7 7 V11 M9.3 7 V11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-gear" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="2.1" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <path d="M8 1.8 V3.4 M8 12.6 V14.2 M1.8 8 H3.4 M12.6 8 H14.2 M3.6 3.6 L4.8 4.8 M11.2 11.2 L12.4 12.4 M12.4 3.6 L11.2 4.8 M4.8 11.2 L3.6 12.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-chev-r" viewBox="0 0 16 16">
+      <path d="M6 3.5 L10.5 8 L6 12.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="brand">
+  <span class="mark"><svg width="34" height="34"><use href="#mark"/></svg></span>
+  <div>
+    <div class="name">渡口</div>
+    <div class="slogan">稿件在此落库，渡往各处</div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="input-wrap">
+    <svg width="15" height="15"><use href="#i-link"/></svg>
+    <textarea id="url" placeholder="粘贴微信文章或飞书文档链接"></textarea>
+  </div>
+
+  <div class="dest-label">渡 往</div>
+  <div class="dest">
+    <button id="go-x"><span>X文章</span><svg width="13" height="13"><use href="#i-chev-r"/></svg></button>
+    <button id="go-bili"><span>B站专栏</span><svg width="13" height="13"><use href="#i-chev-r"/></svg></button>
+    <button id="go-save"><span>存入文库</span><svg width="13" height="13"><use href="#i-chev-r"/></svg></button>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <div class="lib-head">
+    <span class="t">文 库</span><span class="n" id="lib-count"></span>
+  </div>
+  <div id="library"></div>
+</div>
+
+<details class="foot">
+  <summary>
+    <svg width="14" height="14"><use href="#i-gear"/></svg>
+    <span>飞书配置</span>
+    <svg class="chev" width="13" height="13"><use href="#i-chev-r"/></svg>
+  </summary>
+  <div class="cfg">
+    <input id="fs-appid" placeholder="app_id（cli_xxx）">
+    <input id="fs-secret" type="password" placeholder="app_secret">
+    <input id="fs-openid" placeholder="你的open_id（ou_xxx），用于授予文档权限">
+    <button id="fs-save" class="save">保存配置</button>
+  </div>
+</details>
+
+<div class="agent-tip">
+  搭配 AI 终端更顺手：给 Claude Code 装上渡口 skill，一句「把这篇渡到X」就能自动投稿/取稿
+  · <a href="https://github.com/alchaincyf/dukou#给ai终端装skill" target="_blank">安装方法</a>
+</div>
+
+<script src="jszip.min.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>
