@@ -37,6 +37,18 @@ document.getElementById('go-x').addEventListener('click', () => start('x'));
 document.getElementById('go-bili').addEventListener('click', () => start('bili'));
 document.getElementById('go-save').addEventListener('click', () => start('none'));
 
+// 没粘链接时渡往按钮置灰（disabled样式popup.html里已有）
+const destBtns = ['go-x', 'go-bili', 'go-save'].map((id) => document.getElementById(id));
+function syncDestBtns() {
+  const empty = !urlInput.value.trim();
+  destBtns.forEach((b) => {
+    b.disabled = empty;
+    b.title = empty ? '先粘贴微信文章或飞书文档链接' : '';
+  });
+}
+urlInput.addEventListener('input', syncDestBtns);
+syncDestBtns();
+
 // 状态展示与同步
 chrome.storage.local.get('wx_status', (d) => {
   if (d.wx_status) setStatus(d.wx_status.text, d.wx_status.error);
